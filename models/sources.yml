@@ -1,0 +1,19 @@
+version: 2
+
+# The raw data, declared as SOURCES.
+#
+# A source is dbt's name for a table dbt did NOT build — data that arrived from
+# outside (here, pipeline.steps.load_raw put it in the `raw` schema). Declaring
+# it buys three things: models say {{ source('raw', 'orders') }} instead of
+# hard-coding raw.orders (the location lives in one place), sources show up in
+# the lineage graph, and you can test raw data before a transform touches it.
+
+sources:
+  - name: raw
+    description: "Files loaded as-is by pipeline.steps.load_raw — the mess is intentional."
+    schema: raw
+    tables:
+      - name: orders
+        description: "Order events, re-ingested flakily: dup order_ids, money as text, three date formats."
+      - name: customers
+        description: "Customer records, re-ingested: dup customer_ids with a rising record_version."

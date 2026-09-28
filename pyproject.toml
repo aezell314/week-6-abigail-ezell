@@ -1,0 +1,40 @@
+[project]
+name = "de-orchestrated"
+version = "0.6.0"
+description = "Week 6 data engineering: the whole pipeline as one Prefect flow — tasks, retries, schedules, and logs"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dbt-core>=1.9",
+    "dbt-duckdb>=1.9",
+    "duckdb>=1.5.3",
+    "prefect>=3.4",
+]
+
+# This week there's no Python package to build — dbt is the framework and your
+# code is SQL. uv just manages the environment.
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.17",
+]
+
+# ---------------------------------------------------------------------------
+# Ruff: linter + formatter for the provided scripts. Run `uv run ruff check .`
+# Docs: https://docs.astral.sh/ruff/
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["pipeline"]
+
+[tool.ruff.lint]
+#   E/W = pycodestyle, F = pyflakes, I = isort (import sorting),
+#   B   = bugbear,     UP = pyupgrade, SIM = flake8-simplify
+select = ["E", "W", "F", "I", "B", "UP", "SIM"]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"

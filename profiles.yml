@@ -1,0 +1,21 @@
+# profiles.yml — HOW dbt connects to a warehouse. **Provided — don't change.**
+#
+# In real teams this file holds credentials (Snowflake account, BigQuery
+# project, ...) and lives OUTSIDE the repo in ~/.dbt/, one per person. Ours has
+# no secrets — it points at a local DuckDB file — so we commit it right here in
+# the project root, where dbt looks first.
+#
+# The name on the first line must match `profile:` in dbt_project.yml. That's
+# the whole handshake: project says "I connect with week6", this file defines
+# what "week6" means.
+#
+# `target: dev` picks which output to use. Real projects add a `prod:` output
+# (same models, different warehouse) — that's how one repo serves both.
+
+week6:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: data/warehouse.duckdb
+      threads: 1

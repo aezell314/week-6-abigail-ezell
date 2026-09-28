@@ -1,0 +1,61 @@
+version: 2
+
+# Tests + docs — provided and passing.
+#
+# dbt tests assert things about your DATA (pytest asserted things about your
+# code). Each entry below compiles to a SQL query that returns violating rows;
+# any rows back = FAIL. `dbt build` runs these right after each model, so a
+# broken contract stops the pipeline before bad data reaches the dashboard.
+# The descriptions surface in the docs site — they answer "what is this column?"
+
+models:
+  - name: orders_deduped
+    description: "One row per order_id — the newest copy by updated_at. Raw mess in, unique keys out."
+    columns:
+      - name: order_id
+        description: "Primary key. If unique fails, the dedup regressed."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: customers_deduped
+    description: "One row per customer_id — the highest record_version wins."
+    columns:
+      - name: customer_id
+        description: "Primary key. Duplicates here fan out every downstream join."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: clean_orders
+    description: "Typed, normalized orders. Money is numeric, dates are DATEs, status is lowercase."
+    columns:
+      - name: order_id
+        description: "Still unique — dedup happened upstream, cleaning doesn't add rows."
+        data_tests:
+          - not_null
+          - unique
+      - name: status
+        description: "Normalized to a small, closed set of values."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["pending", "shipped", "completed", "cancelled", "unknown"]
+      - name: customer_id
+        description: "Every non-NULL customer_id must exist in customers_deduped."
+        data_tests:
+          # relationships IGNORES NULLs, so the Week 2 null-join-key orders still
+          # pass — they're dropped by the inner join in the mart, not broken data.
+          - relationships:
+              arguments:
+                to: ref('customers_deduped')
+                field: customer_id
+
+  - name: customer_order_summary
+    description: "One row per customer with order_count and total_revenue. The thing people query."
+    columns:
+      - name: customer_id
+        description: "Primary key. If it duplicates, every dashboard on top double-counts."
+        data_tests:
+          - not_null
+          - unique

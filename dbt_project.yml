@@ -1,0 +1,35 @@
+# dbt_project.yml — WHAT this dbt project is. **Provided — don't change.**
+#
+# dbt reads this file to know the project's name, where models live, and how to
+# materialize them. Skim it top to bottom on Day 1 — it's short on purpose.
+
+name: "week6"
+version: "1.0.0"
+
+# Must match a profile in profiles.yml (ours is committed in the repo root).
+profile: "week6"
+
+# Where dbt looks for .sql model files. Every .sql file under here is a model.
+model-paths: ["models"]
+
+# Where dbt writes compiled SQL + artifacts. Rebuildable — gitignored.
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+# Variables models can read with {{ var("...") }}. Week 2 passed min_orders as
+# a bound parameter from Python; in dbt it becomes a project variable you can
+# override per-run:  dbt run --vars 'min_orders: 5'
+vars:
+  min_orders: 2
+
+# Materializations: how a model's SELECT becomes a real object in the warehouse.
+#   view  = cheap, always fresh, recomputed on every query (fine for staging)
+#   table = computed once at `dbt run`, fast to query (right for the mart)
+# Notice what your models do NOT contain: any CREATE TABLE statements. Models
+# are pure SELECTs; dbt wraps them in whatever DDL this config calls for.
+models:
+  week6:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
