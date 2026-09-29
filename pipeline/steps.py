@@ -1,16 +1,9 @@
-"""The pipeline's steps, as importable functions. **Provided — read, don't rewrite.**
-
-Nothing in here is new. This is the work you've been doing all course, gathered
-into one place so a single program can run it end to end:
-
-    check_source_freshness  -> the step that talks to the outside world (Week 2's API lesson)
+"""
+    check_source_freshness  -> the step that talks to the outside world
     generate_source_data    -> stands in for "extract from the real source"
-    load_raw                -> files into DuckDB, as-is (Weeks 1-4)
-    dbt_build               -> your models + tests (Week 4)
-    publish_serving         -> the serving copy Metabase reads (Week 5)
-
-What IS new this week is everything AROUND these functions: tracking, retries,
-schedules, logs. That's flow.py — your file.
+    load_raw                -> files into DuckDB, as-is
+    dbt_build               -> your models + tests
+    publish_serving         -> the serving copy Metabase reads
 """
 
 from __future__ import annotations
@@ -32,18 +25,16 @@ SOURCE_DIR = REPO_ROOT / "data" / "source"
 SERVING_DIR = REPO_ROOT / "data" / "serving"
 SERVING_DB = SERVING_DIR / "warehouse.duckdb"
 
-# The serving-layer contract — the gold tables Metabase reads. Same deliberate
-# subset as Week 5's serving repo.
+# The serving-layer contract — the gold tables Metabase reads.
 GOLD_TABLES = ["clean_orders", "customer_order_summary"]
 
 
 def check_source_freshness() -> None:
     """Ping the upstream source before doing any work.
 
-    Our 'upstream' is simulated, but its failure mode is painfully real:
-    networks flake, APIs rate-limit, vendors deploy on Fridays. Set the
-    SOURCE_FLAKINESS env var (0.0-1.0) to control how often this blows up —
-    Day 2 turns it up on purpose.
+    The 'upstream' here is simulated, but its failure mode is real:
+    networks flake, APIs rate-limit, vendors deploy on Fridays. The
+    SOURCE_FLAKINESS env var can be set between 0.0 and 1.0 to control how often this blows up.
     """
     flakiness = float(os.environ.get("SOURCE_FLAKINESS", "0"))
     if random.random() < flakiness:
@@ -98,8 +89,7 @@ def publish_serving() -> int:
     files on purpose. DuckDB is single-writer: a live dashboard holding
     warehouse.duckdb open (even read-only) would block the next dbt rebuild.
     Splitting the serving copy out is what lets the pipeline re-run on a
-    schedule while Metabase stays connected. (Week 5 used DuckLake for this
-    decoupling; a plain published copy is the simpler version of the same idea.)
+    schedule while Metabase stays connected.
 
     We build the serving file under a temp name and atomically swap it into
     place, so Metabase never opens a half-written file. Returns the number of

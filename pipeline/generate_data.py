@@ -1,9 +1,4 @@
-"""Generate the synthetic source data for Week 2.
-
-Week 1's data was *lightly* messy. Week 2's is messy the way real upstream feeds
-are messy — because a flaky ingestion keeps re-sending records, because money
-arrives as text, and because three teams upstream each picked a different date
-format. Produces two files under ``data/source/``:
+"""Generate synthetic source data. Produces two files under ``data/source/``:
 
   - orders.csv      ~30,000 logical orders, but MORE rows than that because some
                     are re-ingested. Each row carries an ``updated_at`` so you can
